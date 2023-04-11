@@ -5,12 +5,14 @@ import 'package:face_net_authentication/pages/widgets/auth_button.dart';
 import 'package:face_net_authentication/pages/widgets/camera_detection_preview.dart';
 import 'package:face_net_authentication/pages/widgets/camera_header.dart';
 import 'package:face_net_authentication/pages/widgets/signin_form.dart';
+import 'package:face_net_authentication/pages/widgets/signin_pass.dart';
 import 'package:face_net_authentication/pages/widgets/single_picture.dart';
 import 'package:face_net_authentication/services/camera.service.dart';
 import 'package:face_net_authentication/services/ml_service.dart';
 import 'package:face_net_authentication/services/face_detector_service.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({Key? key}) : super(key: key);
@@ -28,6 +30,7 @@ class SignInState extends State<SignIn> {
 
   bool _isPictureTaken = false;
   bool _isInitializing = false;
+  int retry = 5;
 
   @override
   void initState() {
@@ -95,9 +98,14 @@ class SignInState extends State<SignIn> {
     await takePicture();
     if (_faceDetectorService.faceDetected) {
       User? user = await _mlService.predict();
-      var bottomSheetController = scaffoldKey.currentState!
-          .showBottomSheet((context) => signInSheet(user: user));
-      bottomSheetController.closed.whenComplete(_reload);
+      if (retry > 0) {
+        retry--;
+        var bottomSheetController = scaffoldKey.currentState!
+            .showBottomSheet((context) => signInSheet(user: user));
+        bottomSheetController.closed.whenComplete(_reload);
+      } else {
+        Get.to(SignInAlt());
+      }
     }
   }
 

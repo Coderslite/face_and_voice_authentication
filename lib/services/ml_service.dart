@@ -11,7 +11,7 @@ import 'package:image/image.dart' as imglib;
 
 class MLService {
   Interpreter? _interpreter;
-  double threshold = 0.5;
+  double threshold = 1.5;
 
   List _predictedData = [];
   List get predictedData => _predictedData;
@@ -105,9 +105,9 @@ class MLService {
   }
 
   Future<User?> _searchResult(List predictedData) async {
-    DatabaseHelper _dbHelper = DatabaseHelper.instance;
+    // DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
-    List<User> users = await _dbHelper.queryAllUsers();
+    List<User> users = await DatabaseHelper.queryAllUsers();
     double minDist = 999;
     double currDist = 0.0;
     User? predictedResult;

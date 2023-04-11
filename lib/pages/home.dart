@@ -1,6 +1,8 @@
 import 'package:face_net_authentication/constants/constants.dart';
 import 'package:face_net_authentication/locator.dart';
 import 'package:face_net_authentication/pages/db/databse_helper.dart';
+import 'package:face_net_authentication/pages/home_screen.dart';
+import 'package:face_net_authentication/pages/models/user.model.dart';
 import 'package:face_net_authentication/pages/sign-in.dart';
 import 'package:face_net_authentication/pages/sign-up.dart';
 import 'package:face_net_authentication/services/camera.service.dart';
@@ -8,10 +10,15 @@ import 'package:face_net_authentication/services/ml_service.dart';
 import 'package:face_net_authentication/services/face_detector_service.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key}) : super(key: key);
+  final bool registered;
+  final bool isAppLocked;
+  MyHomePage({Key? key, required this.registered, required this.isAppLocked})
+      : super(key: key);
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -55,11 +62,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 Icons.more_vert,
                 color: Colors.black,
               ),
-              onSelected: (value) {
+              onSelected: (value) async {
                 switch (value) {
                   case 'Clear DB':
                     DatabaseHelper _dataBaseHelper = DatabaseHelper.instance;
                     _dataBaseHelper.deleteAll();
+                    var prefs = await SharedPreferences.getInstance();
+                    prefs.remove('voice');
+                    prefs.remove('appsLocked');
                     break;
                 }
               },
@@ -88,7 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: Column(
                           children: [
                             Text(
-                              "FACE RECOGNITION AUTHENTICATION",
+                              "FACE AND VOICE RECOGNITION AUTHENTICATION",
                               style: TextStyle(
                                   fontSize: 25, fontWeight: FontWeight.bold),
                               textAlign: TextAlign.center,
@@ -97,7 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               height: 20,
                             ),
                             Text(
-                              "Demo application that uses Flutter and tensorflow to implement authentication with facial recognition",
+                              "This is an authentication app that allows you to lock mobile application using face and voice recognition",
                               style: TextStyle(
                                 fontSize: 16,
                               ),
@@ -106,100 +116,111 @@ class _MyHomePageState extends State<MyHomePage> {
                           ],
                         ),
                       ),
+                      const SizedBox(
+                        height: 20,
+                      ),
                       Column(
                         children: [
+                          // InkWell(
+                          //   onTap: () {
+                          //     Navigator.push(
+                          //       context,
+                          //       MaterialPageRoute(
+                          //         builder: (BuildContext context) => SignIn(),
+                          //       ),
+                          //     );
+                          //   },
+                          //   child: Container(
+                          //     decoration: BoxDecoration(
+                          //       borderRadius: BorderRadius.circular(10),
+                          //       color: Colors.white,
+                          //       boxShadow: <BoxShadow>[
+                          //         BoxShadow(
+                          //           color: Colors.blue.withOpacity(0.1),
+                          //           blurRadius: 1,
+                          //           offset: Offset(0, 2),
+                          //         ),
+                          //       ],
+                          //     ),
+                          //     alignment: Alignment.center,
+                          //     padding: EdgeInsets.symmetric(
+                          //         vertical: 14, horizontal: 16),
+                          //     width: MediaQuery.of(context).size.width * 0.8,
+                          //     child: Row(
+                          //       mainAxisAlignment: MainAxisAlignment.center,
+                          //       children: [
+                          //         Text(
+                          //           'LOGIN',
+                          //           style: TextStyle(color: Color(0xFF0F0BDB)),
+                          //         ),
+                          //         SizedBox(
+                          //           width: 10,
+                          //         ),
+                          //         Icon(Icons.login, color: Color(0xFF0F0BDB))
+                          //       ],
+                          //     ),
+                          //   ),
+                          // ),
+                          // SizedBox(
+                          //   height: 10,
+                          // ),
+                          // InkWell(
+                          //   onTap: () {
+                          //     Navigator.push(
+                          //       context,
+                          //       MaterialPageRoute(
+                          //         builder: (BuildContext context) => SignUp(),
+                          //       ),
+                          //     );
+
+                          //     // DatabaseHelper.queryAllUsers();
+                          //   },
+                          //   child: Container(
+                          //     decoration: BoxDecoration(
+                          //       borderRadius: BorderRadius.circular(10),
+                          //       color: Color(0xFF0F0BDB),
+                          //       boxShadow: <BoxShadow>[
+                          //         BoxShadow(
+                          //           color: Colors.blue.withOpacity(0.1),
+                          //           blurRadius: 1,
+                          //           offset: Offset(0, 2),
+                          //         ),
+                          //       ],
+                          //     ),
+                          //     alignment: Alignment.center,
+                          //     padding: EdgeInsets.symmetric(
+                          //         vertical: 14, horizontal: 16),
+                          //     width: MediaQuery.of(context).size.width * 0.8,
+                          //     child: Row(
+                          //       mainAxisAlignment: MainAxisAlignment.center,
+                          //       children: [
+                          //         Text(
+                          //           'SIGN UP',
+                          //           style: TextStyle(color: Colors.white),
+                          //         ),
+                          //         SizedBox(
+                          //           width: 10,
+                          //         ),
+                          //         Icon(Icons.person_add, color: Colors.white)
+                          //       ],
+                          //     ),
+                          //   ),
+                          // ),
+                          // SizedBox(
+                          //   height: 20,
+                          //   width: MediaQuery.of(context).size.width * 0.8,
+                          //   child: Divider(
+                          //     thickness: 2,
+                          //   ),
+                          // ),
                           InkWell(
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (BuildContext context) => SignIn(),
-                                ),
-                              );
+                              widget.registered
+                                  ? widget.isAppLocked
+                                      ? Get.to(SignIn())
+                                      : Get.to(HomeScreen())
+                                  : Get.to(SignUp());
                             },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: Colors.white,
-                                boxShadow: <BoxShadow>[
-                                  BoxShadow(
-                                    color: Colors.blue.withOpacity(0.1),
-                                    blurRadius: 1,
-                                    offset: Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              alignment: Alignment.center,
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 14, horizontal: 16),
-                              width: MediaQuery.of(context).size.width * 0.8,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'LOGIN',
-                                    style: TextStyle(color: Color(0xFF0F0BDB)),
-                                  ),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Icon(Icons.login, color: Color(0xFF0F0BDB))
-                                ],
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (BuildContext context) => SignUp(),
-                                ),
-                              );
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: Color(0xFF0F0BDB),
-                                boxShadow: <BoxShadow>[
-                                  BoxShadow(
-                                    color: Colors.blue.withOpacity(0.1),
-                                    blurRadius: 1,
-                                    offset: Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              alignment: Alignment.center,
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 14, horizontal: 16),
-                              width: MediaQuery.of(context).size.width * 0.8,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'SIGN UP',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Icon(Icons.person_add, color: Colors.white)
-                                ],
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 20,
-                            width: MediaQuery.of(context).size.width * 0.8,
-                            child: Divider(
-                              thickness: 2,
-                            ),
-                          ),
-                          InkWell(
-                            onTap: _launchURL,
                             child: Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
@@ -220,16 +241,20 @@ class _MyHomePageState extends State<MyHomePage> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    'CONTRIBUTE',
+                                    widget.registered
+                                        ? widget.isAppLocked
+                                            ? 'UNLOCK APP'
+                                            : 'Proceed'
+                                        : 'Get Started',
                                     style: TextStyle(color: Colors.white),
                                   ),
                                   SizedBox(
                                     width: 10,
                                   ),
-                                  FaIcon(
-                                    FontAwesomeIcons.github,
-                                    color: Colors.white,
-                                  )
+                                  // FaIcon(
+                                  //   FontAwesomeIcons.github,
+                                  //   color: Colors.white,
+                                  // )
                                 ],
                               ),
                             ),
