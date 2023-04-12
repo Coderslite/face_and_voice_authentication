@@ -11,7 +11,7 @@ import 'package:image/image.dart' as imglib;
 
 class MLService {
   Interpreter? _interpreter;
-  double threshold = 1.5;
+  double threshold = 0.9;
 
   List _predictedData = [];
   List get predictedData => _predictedData;
